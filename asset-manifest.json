@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/Decentralized-Crypto-Casino/static/css/main.24dd6671.css",
+    "main.js": "/Decentralized-Crypto-Casino/static/js/main.fd823194.js",
+    "static/media/Gold-Star-PNG-Photos.png": "/Decentralized-Crypto-Casino/static/media/Gold-Star-PNG-Photos.c651165d72ba883aa3bc.png",
+    "static/media/Casino.png": "/Decentralized-Crypto-Casino/static/media/Casino.bac7938e62701e2fe552.png",
+    "static/media/Roulette.png": "/Decentralized-Crypto-Casino/static/media/Roulette.7aa1463b6bd945d9a7f8.png",
+    "static/media/Roulette.webp": "/Decentralized-Crypto-Casino/static/media/Roulette.9772d8089886f0bc098c.webp",
+    "index.html": "/Decentralized-Crypto-Casino/index.html",
+    "main.24dd6671.css.map": "/Decentralized-Crypto-Casino/static/css/main.24dd6671.css.map",
+    "main.fd823194.js.map": "/Decentralized-Crypto-Casino/static/js/main.fd823194.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.24dd6671.css",
+    "static/js/main.fd823194.js"
+  ]
+}
