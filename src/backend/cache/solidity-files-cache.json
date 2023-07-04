@@ -1,12 +1,12 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\brais\\OneDrive\\Escritorio\\CriptoCasino\\src\\backend\\contracts\\Casino.sol": {
-      "lastModificationDate": 1674467648214,
+    "o:\\Users\\Peter\\Documents\\vscode\\Decentralized-Crypto-Casino\\src\\backend\\contracts\\Casino.sol": {
+      "lastModificationDate": 1688288621910,
       "contentHash": "72bbaaddc74ed2f84b38f47190e214ef",
       "sourceName": "src/backend/contracts/Casino.sol",
       "solcConfig": {
-        "version": "0.8.4",
+        "version": "0.8.18",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -39,12 +39,12 @@
         "Casino"
       ]
     },
-    "C:\\Users\\brais\\OneDrive\\Escritorio\\CriptoCasino\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
-      "lastModificationDate": 1674466755118,
-      "contentHash": "e436cea06129be2c73cda4b1acc848b5",
+    "o:\\Users\\Peter\\Documents\\vscode\\Decentralized-Crypto-Casino\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
+      "lastModificationDate": 1688210763038,
+      "contentHash": "5a20b2cad87ddb61c7a3a6af21289e28",
       "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
       "solcConfig": {
-        "version": "0.8.4",
+        "version": "0.8.18",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -76,12 +76,12 @@
         "Ownable"
       ]
     },
-    "C:\\Users\\brais\\OneDrive\\Escritorio\\CriptoCasino\\src\\backend\\contracts\\Token.sol": {
-      "lastModificationDate": 1674468561867,
+    "o:\\Users\\Peter\\Documents\\vscode\\Decentralized-Crypto-Casino\\src\\backend\\contracts\\Token.sol": {
+      "lastModificationDate": 1688288644789,
       "contentHash": "331f8ff8995e2641854d341dbe17ff53",
       "sourceName": "src/backend/contracts/Token.sol",
       "solcConfig": {
-        "version": "0.8.4",
+        "version": "0.8.18",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -112,12 +112,12 @@
         "IERC20"
       ]
     },
-    "C:\\Users\\brais\\OneDrive\\Escritorio\\CriptoCasino\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
-      "lastModificationDate": 1674341339710,
+    "o:\\Users\\Peter\\Documents\\vscode\\Decentralized-Crypto-Casino\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+      "lastModificationDate": 1688210758908,
       "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
-        "version": "0.8.4",
+        "version": "0.8.18",
         "settings": {
           "optimizer": {
             "enabled": false,

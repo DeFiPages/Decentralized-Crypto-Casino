@@ -89,7 +89,7 @@ export default function Header({ login, account, balance }) {
     if (account === "") {
       return (
         <Button variant="contained" color="error" onClick={login}>
-          Conect
+          Connect
         </Button>
       );
     } else {
