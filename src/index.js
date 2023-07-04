@@ -9,7 +9,7 @@ import "regenerator-runtime/runtime.js";
 import store from "./store";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Router>
+  <Router basename="/Decentralized-Crypto-Casino/">
     <Provider store={store}>
       <App />
     </Provider>
