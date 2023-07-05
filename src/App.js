@@ -11,6 +11,7 @@ import { loadHistorial } from './reducers/historialReducer';
 import BuyTokens from './components/BuyTokens';
 import WithdrawTokens from './components/Withdraw';
 import Header from './components/Header';
+import Tutorial from './components/Tutorial';
 import {
   Routes,
   Route,
@@ -72,6 +73,7 @@ const App = () => {
     </Grid>
     <Grid item xs={12}>
       <Routes>
+        <Route path="/" element={<Tutorial />} />
         <Route path="/Wallet" element={<Wallet/>} > 
           <Route path="buyTokens" element={<BuyTokens account={account} price={price} />} />
           <Route path="withdrawTokens" element={<WithdrawTokens balance={balance} account={account} price={price}/>} />
