@@ -31,8 +31,14 @@ module.exports = {
       gasPrice: 20000000000,
       accounts: [privateKey]
     },
-    dmcTestnet: {
+    dmcMydeficain: {
       url: "https://testnet-dmc.mydefichain.com:20551/",
+	  chainId: 1133,
+      gas: 30_000_000,
+      accounts: [privateKey]
+    },
+    dmcTestnet: {
+      url: "http://127.0.0.1:20551/",
 	  chainId: 1133,
       gas: 30_000_000,
       accounts: [privateKey]
