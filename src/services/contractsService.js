@@ -45,13 +45,8 @@ const getDUSDBalance = async (account) => {
         throw new Error("DUSD token contract is not initialized.");
     }
     console.log(dusdToken);
-
     console.log("DUSD Token Address in Code:", dusdToken.address);
     console.log("Queried Account Address:", account);
-    let provider = new ethers.providers.JsonRpcProvider();
-    const network = await provider.getNetwork();
-    console.log("Connected Network:", network.name);
-
     return await dusdToken.balanceOf(account);
 }
 
