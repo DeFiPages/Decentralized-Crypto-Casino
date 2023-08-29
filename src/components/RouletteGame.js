@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Ruleta from "./Roulette";
-import {  Grid, Button } from "@mui/material";
+import { Grid, Button } from "@mui/material";
 import { useField } from "../hooks/useField";
 import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,7 +9,7 @@ import contractsService from '../services/contractsService';
 import { loadBalance } from "../reducers/balanceReducer";
 import SelectAmount from "./SelectAmount";
 
-const RouletteGame = ({balance, account}) => {
+const RouletteGame = ({ balance, account }) => {
   const dispatch = useDispatch()
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
@@ -18,10 +18,10 @@ const RouletteGame = ({balance, account}) => {
   const end = useField("");
   const [lastResult, setlastResult] = useState("");
 
-  const onWheelStop= async()=>{
+  const onWheelStop = async () => {
     setMustSpin(false)
     await dispatch(loadBalance(account))
-    if (lastResult.result === true){
+    if (lastResult.result === true) {
       toast.success(`Congratulations, you have earned ${lastResult.tokensEarned} tokens!!`, {
         position: "top-right",
         autoClose: 3000,
@@ -30,13 +30,13 @@ const RouletteGame = ({balance, account}) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        });
+      });
     }
   }
 
-  const handleSpinClick = async(event) => {
+  const handleSpinClick = async (event) => {
     event.preventDefault();
-    if (betAmount.value === ""){
+    if (betAmount.value === "") {
       toast.error(`Please select an amount of tokens to buy`, {
         position: "top-right",
         autoClose: 3000,
@@ -45,24 +45,24 @@ const RouletteGame = ({balance, account}) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        });
-    }else{
-    try{
-      const result =await contractsService.playRoulette(start.value, end.value, betAmount.value)
-      setlastResult(result)
-      setPrizeNumber(result.numberWon)
-      setMustSpin(true)
-    }catch(error){
-      toast.error(`An error has occurred please try again later`, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        });
-    }}
+      });
+    } else {
+      try {
+        const result = await contractsService.playRoulette(start.value, end.value, betAmount.value)
+        setlastResult(result)
+        setPrizeNumber(result.numberWon)
+        setMustSpin(true)
+      } catch (error) {
+        console.error("Error while playRoulette:", error);
+        if (error.data && error.data.message) {
+          toast.error(`Transaction failed: ${error.data.message}`);
+        } else if (error.message) {
+          toast.error(`Transaction failed: ${error.message}`);
+        } else {
+          toast.error('Transaction failed.');
+        }
+      }
+    }
 
   };
 
@@ -102,7 +102,7 @@ const RouletteGame = ({balance, account}) => {
           <Ruleta
             newPrizeNumber={prizeNumber}
             mustSpin={mustSpin}
-            functionallity={()=> onWheelStop()}
+            functionallity={() => onWheelStop()}
           />
         </Grid>
       </Grid>
@@ -131,7 +131,7 @@ const RouletteGame = ({balance, account}) => {
                       variant="contained"
                       color="error"
                       type="submit"
-                      onClick={()=>changeNumberBet(1,7)}
+                      onClick={() => changeNumberBet(1, 7)}
                     >
                       1-7
                     </Button>
@@ -146,7 +146,7 @@ const RouletteGame = ({balance, account}) => {
                       variant="contained"
                       color="success"
                       type="submit"
-                      onClick={()=>changeNumberBet(0,0)}
+                      onClick={() => changeNumberBet(0, 0)}
                     >
                       0
                     </Button>
@@ -161,7 +161,7 @@ const RouletteGame = ({balance, account}) => {
                       size={"large"}
                       type={"submit"}
                       width={"80%"}
-                      functionallity={()=>changeNumberBet(8,14)}
+                      functionallity={() => changeNumberBet(8, 14)}
                     />
                   </Grid>
                 </Grid>

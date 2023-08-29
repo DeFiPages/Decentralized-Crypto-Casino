@@ -1,128 +1,129 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./Token.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./MintableToken.sol";
+import "./Roulette.sol";
 
-contract Casino is Ownable{
+interface IDUSD {
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
-    event RouletteGame (
-        uint NumberWin,
-        bool result,
-        uint tokensEarned
-    );
+    function approve(address spender, uint256 amount) external returns (bool);
 
-    ERC20 private token;
-    address public tokenAddress;
+    function balanceOf(address account) external view returns (uint256);
 
-    function precioTokens(uint256 _numTokens) public pure returns (uint256){
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
+
+contract Casino is Ownable, ReentrancyGuard {
+    MintableToken public casToken;
+    IDUSD public dusdToken;
+    Roulette public rouletteGame;
+
+    uint256 public rate = 100; // 1 DUSD = 100 CAS
+
+    constructor(address _dusdAddress, address _rouletteAddress) {
+        casToken = new MintableToken("Casino", "CAS");
+        dusdToken = IDUSD(_dusdAddress);
+        rouletteGame = Roulette(_rouletteAddress);
+
+        casToken.mint(address(this), 1000000 * 10 ** casToken.decimals());
+    }
+
+    function setRouletteAddress(address _rouletteAddress) external onlyOwner {
+        rouletteGame = Roulette(_rouletteAddress);
+    }
+
+    function buyTokens(uint256 dusdAmountInWei) public nonReentrant {
+        uint256 casAmount = calculateCasAmount(dusdAmountInWei);
+
+        requireDUSDBalance(dusdAmountInWei);
+        transferDUSDToCasino(dusdAmountInWei);
+
+        ensureCasinoHasSufficientCASTokens(casAmount);
+        transferCASToUser(casAmount);
+    }
+
+    function returnCasTokens(uint256 casAmount) public nonReentrant {
+        uint256 dusdAmountInWei = calculateDUSDAmount(casAmount);
+
+        requireCASBalance(casAmount);
+        transferCASToCasino(casAmount);
+
+        ensureCasinoHasSufficientDUSDTokens(dusdAmountInWei);
+        transferDUSDToUser(dusdAmountInWei);
+    }
+
+    function tokenPrice(uint256 _numTokens) public pure returns (uint256) {
         return _numTokens * (0.001 ether);
     }
 
-    function tokenBalance(address _of) public view returns (uint256){
-        return token.balanceOf(_of);
-    }
-    constructor(){
-        token =  new ERC20("Casino", "CAS");
-        tokenAddress = address(token);
-        token.mint(1000000);
+    function tokenBalance(address _of) public view returns (uint256) {
+        return casToken.balanceOf(_of);
     }
 
-    // Visualizacion del balance de ethers del Smart Contract
-    function balanceEthersSC() public view returns (uint256){
-        return address(this).balance / 10**18;
+    function balanceEthersSC() public view returns (uint256) {
+        return address(this).balance / 10 ** 18;
     }
 
-    function getAdress() public view returns (address){
-        return address(token);
-
+    function getAdress() public view returns (address) {
+        return address(casToken);
     }
 
-     function compraTokens(uint256 _numTokens) public payable{
-        // Registro del ususario
-        // Establecimiento del coste de los tokens a comprar
-        // Evaluacion del dinero que el cliente paga por los tokens
-        require(msg.value >= precioTokens(_numTokens), "Compra menos tokens o paga con mas ethers");
-        // Creacion de nuevos tokens en caso de que no exista suficiente supply
-        if  (token.balanceOf(address(this)) < _numTokens){
-            token.mint(_numTokens*100000);
-        }
-        // Devolucion del dinero sobrante
-        // El Smart Contract devuelve la cantidad restante
-        payable(msg.sender).transfer(msg.value - precioTokens(_numTokens));
-        // Envio de los tokens al cliente/usuario
-        token.transfer(address(this), msg.sender, _numTokens);
-    }
-
-    // Devolucion de tokens al Smart Contract
-    function devolverTokens(uint _numTokens) public payable {
-        // El numero de tokens debe ser mayor a 0
-        require(_numTokens > 0, "Necesitas devolver un numero de tokens mayor a 0");
-        // El usuario debe acreditar tener los tokens que quiere devolver
-        require(_numTokens <= token.balanceOf(msg.sender), "No tienes los tokens que deseas devolver");
-        // El usuario transfiere los tokens al Smart Contract
-        token.transfer(msg.sender, address(this), _numTokens);
-        // El Smart Contract envia los ethers al usuario
-        payable(msg.sender).transfer(precioTokens(_numTokens)); 
-    }
-
-    struct Bet {
-        uint tokensBet;
-        uint tokensEarned;
-        string game;
-    }
-
-    struct RouleteResult {
-        uint NumberWin;
-        bool result;
-        uint tokensEarned;
-    }
-
-    mapping(address => Bet []) historialApuestas;
-
-    function retirarEth(uint _numEther) public payable onlyOwner {
-        // El numero de tokens debe ser mayor a 0
-        require(_numEther > 0, "Necesitas devolver un numero de tokens mayor a 0");
-        // El usuario debe acreditar tener los tokens que quiere devolver
-        require(_numEther <= balanceEthersSC(), "No tienes los tokens que deseas devolver");
-        // Transfiere los ethers solicitados al owner del smart contract'
+    function withdrawEth(uint _numEther) public payable onlyOwner {
+        require(_numEther > 0, "Withdrawal amount should be greater than 0.");
+        require(_numEther <= balanceEthersSC(), "Insufficient ethers in the contract.");
         payable(owner()).transfer(_numEther);
     }
 
-    function tuHistorial(address _propietario) public view returns(Bet [] memory){
-        return historialApuestas[_propietario];
+    function authorizeAddressForTokenTransfer(address _address) external onlyOwner {
+        casToken.authorizeAddress(_address);
     }
 
-    function jugarRuleta(uint _start, uint _end, uint _tokensBet) public{
-        require(_tokensBet <= token.balanceOf(msg.sender));
-        require(_tokensBet > 0);
-        uint random = uint(uint(keccak256(abi.encodePacked(block.timestamp))) % 14);
-        uint tokensEarned = 0;
-        bool win = false;
-        token.transfer(msg.sender, address(this), _tokensBet);
-        if ((random <= _end) && (random >= _start)) {
-            win = true;
-            if (random == 0) {
-                tokensEarned = _tokensBet*14;
-            } else {
-                tokensEarned = _tokensBet * 2;
-            }
-            if  (token.balanceOf(address(this)) < tokensEarned){
-            token.mint(tokensEarned*100000);
-            }
-            token.transfer( address(this), msg.sender, tokensEarned);
+    // --- Private Helper Functions ---
+
+    function calculateCasAmount(uint256 dusdAmountInWei) private view returns (uint256) {
+        return (dusdAmountInWei * rate) / 10 ** 18;
+    }
+
+    function calculateDUSDAmount(uint256 casAmount) private view returns (uint256) {
+        return (casAmount * 10 ** 18) / rate;
+    }
+
+    function requireDUSDBalance(uint256 dusdAmountInWei) private view {
+        require(dusdToken.balanceOf(msg.sender) >= dusdAmountInWei, "Insufficient DUSD balance");
+    }
+
+    function requireCASBalance(uint256 casAmount) private view {
+        require(casToken.balanceOf(msg.sender) >= casAmount, "Insufficient CAS balance");
+    }
+
+    function transferDUSDToCasino(uint256 dusdAmountInWei) private {
+        require(dusdToken.transferFrom(msg.sender, address(this), dusdAmountInWei), "DUSD transfer failed");
+    }
+
+    function ensureCasinoHasSufficientCASTokens(uint256 casAmount) private {
+        if (casToken.balanceOf(address(this)) < casAmount) {
+            casToken.mint(address(this), casAmount * 100000);
         }
-            addHistorial("Roulete", _tokensBet, tokensEarned, msg.sender);
-            emit RouletteGame(random, win, tokensEarned);
     }
 
-    function addHistorial(string memory _game, uint _tokensBet,  uint _tokenEarned, address caller) internal{
-        Bet memory apuesta = Bet(_tokensBet, _tokenEarned, _game);
-        historialApuestas[caller].push(apuesta);
+    function transferCASToUser(uint256 casAmount) private {
+        casToken.transfer(msg.sender, casAmount);
     }
 
+    function transferCASToCasino(uint256 casAmount) private {
+        casToken.directTransfer(msg.sender, address(this), casAmount);
     }
 
+    function ensureCasinoHasSufficientDUSDTokens(uint256 dusdAmountInWei) private view {
+        if (dusdToken.balanceOf(address(this)) < dusdAmountInWei) {
+            revert("Insufficient DUSD balance in the Casino contract");
+        }
+    }
 
-
-
+    function transferDUSDToUser(uint256 dusdAmountInWei) private {
+        dusdToken.transfer(msg.sender, dusdAmountInWei);
+    }
+}
