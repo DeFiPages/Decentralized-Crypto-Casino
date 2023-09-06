@@ -1,3 +1,4 @@
+const DST20Abi = require("../contractsData/DST20.json");
 const hre = require("hardhat");
 const { ethers, artifacts } = hre;
 const fs = require("fs");
@@ -27,48 +28,44 @@ async function main() {
   console.log("casTokenAddress used:", casTokenAddress);
 
   let contractName;
+  let dusdToken;  // This will be your contract instance for all chains
 
   switch (chainId) {
-    case 31337: // hardhat local node
-      const mockDUSDInstance = await getContract(chainId, null, "MockDUSD");
-      let mockDUSD;
-      if (mockDUSDInstance) {
-        console.log("Using existing MockDUSD at:", mockDUSDInstance.address);
-        mockDUSD = mockDUSDInstance;
-      } else {
-        const MockDUSD = await ethers.getContractFactory("MockDUSD");
-        mockDUSD = await MockDUSD.deploy();
-        await mockDUSD.deployed();
-        console.log("MockDUSD deployed to:", mockDUSD.address);
-        saveFrontendFiles(mockDUSD, "MockDUSD", chainId);
-        await mockDUSD.faucet(deployer.address, ethers.utils.parseEther("1000"));
-        console.log("Minted 1000 DUSD to", deployer.address);
-      }
-      dusdAddress = mockDUSD.address;
-      contractName = "MockDUSD"; // specify the contract name
-      break;
-
-    case 1130: // DMC mainnet
-      dusdAddress = "0xff0000000000000000000000000000000000000f";
-      contractName = "DUSD"; // specify the contract name
-      break;
-
-    case 1131: // DMC devnet
-    case 1132: // DMC testnet3
-    case 1133: // DMC changi testnet
-      dusdAddress = "0xff0000000000000000000000000000000000000b";
-      contractName = "DUSD"; // specify the contract name
-      break;
-
-    default:
-      console.error("Unsupported chain ID");
-      return;
+      case 31337: // hardhat local node
+          const mockDUSDInstance = await getContract(chainId, null, "MockDUSD");
+          
+          if (mockDUSDInstance) {
+              console.log("Using existing MockDUSD at:", mockDUSDInstance.address);
+              dusdToken = mockDUSDInstance;
+          } else {
+              const MockDUSD = await ethers.getContractFactory("MockDUSD");
+              dusdToken = await MockDUSD.deploy();
+              await dusdToken.deployed();
+              
+              console.log("MockDUSD deployed to:", dusdToken.address);
+              saveFrontendFiles(dusdToken, "MockDUSD", chainId);
+              await dusdToken.faucet(deployer.address, ethers.utils.parseEther("1000"));
+              console.log("Minted 1000 DUSD to", deployer.address);
+          }
+          break;
+  
+      case 1130: // DMC mainnet
+      case 1131: // DMC devnet
+      case 1132: // DMC testnet3
+      case 1133: // DMC changi testnet
+          if (chainId === 1130) {
+              dusdAddress = "0xff0000000000000000000000000000000000000f";
+          } else {
+              dusdAddress = "0xff0000000000000000000000000000000000000b";
+          }
+          
+          dusdToken = await ethers.getContractAt(DST20Abi, dusdAddress);
+          break;
+  
+      default:
+          console.error("Unsupported chain ID");
+          return;
   }
-
-  // After determining the dusdAddress and contract name based on the network,
-  // create the dusdToken instance for subsequent operations:
-  const DUSDContract = await ethers.getContractFactory(contractName);
-  const dusdToken = DUSDContract.attach(dusdAddress);
 
   // Fetch the old Roulette contract address
   const oldRouletteContract = await getContract(chainId, deployer, "Roulette");

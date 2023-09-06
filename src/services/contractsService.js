@@ -3,7 +3,7 @@ import CasinoAbi from "../backend/contractsData/Casino.json";
 //import CasinoAddress from "../backend/contractsData/Casino-address.json";
 import RouletteAbi from "../backend/contractsData/Roulette.json"; // Import the ABI for Roulette
 //import RouletteAddress from "../backend/contractsData/Roulette-address.json"; // Import the address for Roulette
-import DusdAbi from "./DUSDMinimalInterface.json";
+import DusdAbi from "../backend/contractsData/DST20.json";
 /* import { accessListify } from "ethers/lib/utils"; */
 
 let casino = null;
