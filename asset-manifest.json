@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Decentralized-Crypto-Casino/static/css/main.48db30bb.css",
-    "main.js": "/Decentralized-Crypto-Casino/static/js/main.a4757680.js",
+    "main.js": "/Decentralized-Crypto-Casino/static/js/main.be334499.js",
     "static/js/664.2906080a.chunk.js": "/Decentralized-Crypto-Casino/static/js/664.2906080a.chunk.js",
     "static/js/558.aa6b4a57.chunk.js": "/Decentralized-Crypto-Casino/static/js/558.aa6b4a57.chunk.js",
     "static/js/442.0cdcf130.chunk.js": "/Decentralized-Crypto-Casino/static/js/442.0cdcf130.chunk.js",
@@ -13,10 +13,10 @@
     "static/media/dusd.svg": "/Decentralized-Crypto-Casino/static/media/dusd.b0d3df638f32bb917aa4e3bb06a7a70a.svg",
     "index.html": "/Decentralized-Crypto-Casino/index.html",
     "main.48db30bb.css.map": "/Decentralized-Crypto-Casino/static/css/main.48db30bb.css.map",
-    "main.a4757680.js.map": "/Decentralized-Crypto-Casino/static/js/main.a4757680.js.map"
+    "main.be334499.js.map": "/Decentralized-Crypto-Casino/static/js/main.be334499.js.map"
   },
   "entrypoints": [
     "static/css/main.48db30bb.css",
-    "static/js/main.a4757680.js"
+    "static/js/main.be334499.js"
   ]
 }
