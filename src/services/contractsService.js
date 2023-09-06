@@ -12,7 +12,9 @@ let dusdToken = null;
 
 const loadContracts = async (signer) => {
   console.log("loadContracts entry");
-  if (!signer) {    throw new Error("No signer provided for contract initialization.");  }
+  if (!signer) {
+    throw new Error("No signer provided for contract initialization.");
+  }
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const network = await provider.getNetwork();
   const chainId = network.chainId;
@@ -58,7 +60,9 @@ const loadContracts = async (signer) => {
 };
 
 const tokenBalance = async (acc) => {
-  if (!casino) {    throw new Error("Casino contract is not initialized.");}
+  if (!casino) {
+    throw new Error("Casino contract is not initialized.");
+  }
   const balance = await casino.tokenBalance(acc);
   console.log(`tokenBalance ${balance}`);
   return parseInt(balance._hex);
@@ -75,20 +79,28 @@ const getDUSDBalance = async (account) => {
 };
 
 const buyTokens = async (dusdAmount) => {
-  const dusdAmountInWei = ethers.utils.parseUnits(dusdAmount.toString(), 18); // Using ethers.js utility
-  console.log(`ContractService.js:buyTokens: approve dusdAmountInWei ${dusdAmountInWei}`);
-  //await dusdToken.approve(CasinoAddress.address, dusdAmountInWei);
-  await dusdToken.approve(casino.address, dusdAmountInWei);
-  console.log(`buy dusdAmountInWei ${dusdAmountInWei}`);
-  await (await casino.buyCASTokens(dusdAmountInWei)).wait();
+  const dusdAmountInWei = ethers.utils.parseUnits(dusdAmount.toString(), 18);
+
+  const approveGasLimit = (await dusdToken.estimateGas.approve(casino.address, dusdAmountInWei)).mul(120).div(100);
+  await dusdToken.approve(casino.address, dusdAmountInWei, { gasLimit: approveGasLimit });
+
+  const buyGasLimit = (await casino.estimateGas.buyCASTokens(dusdAmountInWei)).mul(120).div(100);
+  await casino.buyCASTokens(dusdAmountInWei, { gasLimit: buyGasLimit });
 };
 
 const withdrawTokens = async (tokenNum) => {
-  await (await casino.withdrawCasTokens(tokenNum)).wait();
+  const estimatedGas = await casino.estimateGas.withdrawCasTokens(tokenNum);
+  const gasLimit = estimatedGas.mul(120).div(100); // Increase the gas limit by 20%
+
+  await casino.withdrawCasTokens(tokenNum, { gasLimit: gasLimit }).wait();
 };
 
 const playRoulette = async (start, end, tokensBet) => {
-  const game = await (await roulette.playRoulette(start, end, tokensBet)).wait();
+  const estimatedGas = await roulette.estimateGas.playRoulette(start, end, tokensBet);
+  const gasLimit = estimatedGas.mul(120).div(100); // Increase the gas limit by 20%
+
+  const game = await (await roulette.playRoulette(start, end, tokensBet, { gasLimit: gasLimit })).wait();
+
   let result;
   try {
     result = {
@@ -108,7 +120,7 @@ const playRoulette = async (start, end, tokensBet) => {
 
 const tokenPrice = async () => {
   const rate = await getRate();
-  
+
   if (rate === 0) {
     throw new Error("Rate is zero. Cannot compute token price.");
   }
@@ -126,7 +138,9 @@ const historial = async (account) => {
 };
 
 const getRate = async () => {
-  if (!casino) {    throw new Error("Casino contract is not initialized.");  }
+  if (!casino) {
+    throw new Error("Casino contract is not initialized.");
+  }
   const fetchedRate = await casino.rate();
   return parseInt(fetchedRate._hex);
 };
