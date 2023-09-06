@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Button, Grid, Typography } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useField } from "../hooks/useField";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import contractsService from '../services/contractsService';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import contractsService from "../services/contractsService";
 import { loadBalance } from "../reducers/balanceReducer";
 import { CustomTextField } from "./customTextField";
 import TotalBNB from "./TotalBNB";
@@ -72,14 +72,12 @@ const Buy = async (event, tokenAmount, change, account, dispatch, contractRate) 
   }
 };
 
-
 const BuyTokens = ({ account, price }) => {
-
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const tokenAmount = useField("");
 
   // State to hold the rate fetched from the smart contract
-  const [contractRate, setContractRate] = useState(100);  // default rate, but you can change this
+  const [contractRate, setContractRate] = useState(100); // default rate, but you can change this
 
   useEffect(() => {
     // This function fetches the rate from the smart contract
@@ -96,59 +94,30 @@ const BuyTokens = ({ account, price }) => {
     if (account !== "") {
       fetchRateFromContract();
     }
+  }, [account]); // This effect runs whenever the account changes
 
-  }, [account]);  // This effect runs whenever the account changes
-
-
+  // Check if account is set and contractRate has been fetched
+  if (!account || contractRate === null) {
+    return <div>Loading...</div>;
+  }
   return (
     <Grid container rowSpacing={2}>
       <Grid item xs={12}>
         <Grid container alignItems="center" justifyContent="center">
-          <Typography variant="h3" sx={{ color: '#FFFFFF', width: '90%' }} align='center'>Tokens Store</Typography>
+          <Typography variant="h3" sx={{ color: "#FFFFFF", width: "90%" }} align="center">
+            Tokens Store
+          </Typography>
         </Grid>
       </Grid>
       <Grid item xs={12}>
         <form onSubmit={(event) => Buy(event, tokenAmount.value, tokenAmount.change, account, dispatch, contractRate)}>
-
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Grid container alignItems="center" justifyContent="center">
-                <CustomButton
-                  display={"10"}
-                  functionallity={() => tokenAmount.change(parseInt(10))}
-                  width={"20%"}
-                  size={'large'}
-                  backGround={'#2e7d32'}
-                  text={'#e0e5bc'}
-                  margin={0.5}
-                />
-                <CustomButton
-                  display={"100"}
-                  functionallity={() => tokenAmount.change(parseInt(100))}
-                  width={"20%"}
-                  size={'large'}
-                  backGround={'#2e7d32'}
-                  text={'#e0e5bc'}
-                  margin={0.5}
-                />
-                <CustomButton
-                  display={"1000"}
-                  functionallity={() => tokenAmount.change(parseInt(1000))}
-                  width={"20%"}
-                  size={'large'}
-                  backGround={'#2e7d32'}
-                  text={'#e0e5bc'}
-                  margin={0.5}
-                />
-                <CustomButton
-                  display={"10000"}
-                  functionallity={() => tokenAmount.change(parseInt(10000))}
-                  width={"20%"}
-                  size={'large'}
-                  backGround={'#2e7d32'}
-                  text={'#e0e5bc'}
-                  margin={0.5}
-                />
+                <CustomButton display={"10"} functionallity={() => tokenAmount.change(parseInt(10))} width={"20%"} size={"large"} backGround={"#2e7d32"} text={"#e0e5bc"} margin={0.5} />
+                <CustomButton display={"100"} functionallity={() => tokenAmount.change(parseInt(100))} width={"20%"} size={"large"} backGround={"#2e7d32"} text={"#e0e5bc"} margin={0.5} />
+                <CustomButton display={"1000"} functionallity={() => tokenAmount.change(parseInt(1000))} width={"20%"} size={"large"} backGround={"#2e7d32"} text={"#e0e5bc"} margin={0.5} />
+                <CustomButton display={"10000"} functionallity={() => tokenAmount.change(parseInt(10000))} width={"20%"} size={"large"} backGround={"#2e7d32"} text={"#e0e5bc"} margin={0.5} />
               </Grid>
             </Grid>
 
@@ -166,8 +135,8 @@ const BuyTokens = ({ account, price }) => {
                   onChange={tokenAmount.onChange}
                   InputLabelProps={{
                     style: {
-                      color: 'white'
-                    }
+                      color: "white",
+                    },
                   }}
                 />
               </Grid>
@@ -175,7 +144,7 @@ const BuyTokens = ({ account, price }) => {
 
             <Grid item xs={12} sx={{ m: 0.25 }}>
               {/* <TotalBNB tokenAmount={tokenAmount.value} price={price} msg={'Cost :'}/> */}
-              <TotalBNB tokenAmount={tokenAmount.value} price={contractRate} msg={'Cost :'} />  {/* Using contractRate here */}
+              <TotalBNB tokenAmount={tokenAmount.value} price={contractRate} msg={"Cost :"} /> {/* Using contractRate here */}
             </Grid>
 
             <Grid item xs={12} sx={{ m: 0.25 }}>

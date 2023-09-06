@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.18;
 
 import "./MintableToken.sol";
 
@@ -17,8 +17,15 @@ contract Roulette {
         string game;
     }
 
+    bool public enabled = true;
+
     constructor() {
         owner = msg.sender;
+    }
+    
+    modifier isEnabled() {
+        require(enabled, "Contract is disabled");
+        _;
     }
 
     modifier onlyOwner() {
@@ -26,12 +33,16 @@ contract Roulette {
         _;
     }
 
+    function setEnabled(bool _enabled) external onlyOwner {
+        enabled = _enabled;
+    }
+
     function setCasTokenAddress(address _casTokenAddress) external onlyOwner {
         require(address(casToken) == address(0), "CAS Token address already set");
         casToken = MintableToken(_casTokenAddress);
     }
 
-    function playRoulette(uint _start, uint _end, uint _tokensBet) external {
+    function playRoulette(uint _start, uint _end, uint _tokensBet) external isEnabled {
         validateRouletteBet(_start, _end, _tokensBet);
         uint tokensEarned = executeRouletteBet(_start, _end, _tokensBet);
         storeBetHistory("Roulete", _tokensBet, tokensEarned);

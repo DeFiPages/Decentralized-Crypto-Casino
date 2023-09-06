@@ -8,7 +8,7 @@ const localPrivateKey = fs.readFileSync(".secret.local").toString().trim();
 
 
 module.exports = {
-  solidity: "0.8.19",
+  solidity: "0.8.20",
   paths: {
     artifacts: "./src/backend/artifacts",
     sources: "./src/backend/contracts",
