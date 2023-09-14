@@ -86,10 +86,7 @@ const App = () => {
           <Route path="/" element={<Tutorial />} />
           <Route path="/Wallet" element={contractsLoaded ? <Wallet /> : <div>Loading...</div>}>
             <Route path="buyTokens" element={<BuyTokens account={account} price={price} />} />
-            <Route
-              path="withdrawTokens"
-              element={<WithdrawTokens balance={balance} account={account} price={price} />}
-            />
+            <Route path="withdrawTokens" element={<WithdrawTokens balance={balance} account={account} price={price} />} />
           </Route>
           <Route path="/games" element={<Games />} />
           <Route path="/games/Roulette" element={<RouletteGame balance={balance} account={account} />} />

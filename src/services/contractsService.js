@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
-import CasinoAbi from "../backend/contractsData/Casino.json";
+//import CasinoAbi from "../backend/contractsData/Casino.json";
 //import CasinoAddress from "../backend/contractsData/Casino-address.json";
-import RouletteAbi from "../backend/contractsData/Roulette.json"; // Import the ABI for Roulette
+//import RouletteAbi from "../backend/contractsData/Roulette.json"; // Import the ABI for Roulette
 //import RouletteAddress from "../backend/contractsData/Roulette-address.json"; // Import the address for Roulette
 import DusdAbi from "../backend/contractsData/DST20.json";
 /* import { accessListify } from "ethers/lib/utils"; */
@@ -19,6 +19,19 @@ const loadContracts = async (signer) => {
   const network = await provider.getNetwork();
   const chainId = network.chainId;
   console.log("Chain ID:", chainId);
+
+  let CasinoAbi, RouletteAbi;
+  try {
+    CasinoAbi = await import(`../backend/contractsData/Casino-${chainId}.json`);
+  } catch (error) {
+    console.error(`Casino abi for chain ID ${chainId} not found.`);
+  }
+
+  try {
+    RouletteAbi = await import(`../backend/contractsData/Roulette-${chainId}.json`);
+  } catch (error) {
+    console.error(`Roulette abi for chain ID ${chainId} not found.`);
+  }
 
   let CasinoAddress, RouletteAddress;
 

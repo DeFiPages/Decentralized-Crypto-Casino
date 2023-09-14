@@ -41,12 +41,12 @@ async function main() {
               const MockDUSD = await ethers.getContractFactory("MockDUSD");
               dusdToken = await MockDUSD.deploy();
               await dusdToken.deployed();
-              
               console.log("MockDUSD deployed to:", dusdToken.address);
               saveFrontendFiles(dusdToken, "MockDUSD", chainId);
               await dusdToken.faucet(deployer.address, ethers.utils.parseEther("1000"));
               console.log("Minted 1000 DUSD to", deployer.address);
           }
+          dusdAddress = dusdToken.address
           break;
   
       case 1130: // DMC mainnet
@@ -148,7 +148,7 @@ function saveFrontendFiles(contract, name, chainId) {
 
   const contractArtifact = artifacts.readArtifactSync(name);
 
-  fs.writeFileSync(contractsDir + `/${name}.json`, JSON.stringify(contractArtifact, null, 2));
+  fs.writeFileSync(contractsDir + `/${name}-${chainId}.json`, JSON.stringify(contractArtifact, null, 2));
 }
 
 /**
@@ -193,97 +193,3 @@ main()
     process.exit(1);
   });
 
-/* 
-async function getContract(chainId, deployer, contractName) {
-  const path = __dirname + `/../../backend/contractsData/${contractName}-address-${chainId}.json`;
-
-  let address;
-  if (fs.existsSync(path)) {
-    const data = fs.readFileSync(path, "utf8");
-    const jsonData = JSON.parse(data);
-    address = jsonData.address;
-  } else {
-    console.log(`Not exists: ${path}`);
-    return null;
-  }
-
-  // Check if contract code exists at the address (i.e., it's not a "0x" result)
-  const code = await ethers.provider.getCode(address);
-  if (code === "0x") {
-    console.log(`${contractName} Contract doesn't exist at the address ${address}`);
-    return null;
-  }
-
-  // Check if the owner of the contract matches the deployer's address
-  const CONTRACT = await ethers.getContractFactory(contractName);
-  const contractInstance = CONTRACT.attach(address);
-  const owner = await contractInstance.owner();
-
-  if (owner === deployer.address) return contractInstance;
-  console.log(`Owner ${owner} of ${contractName} Contract at address ${address} is not deployer ${deployer.address}`);
-  return null;
-} */
-
-/* function getCasinoAddress(chainId) {
-  const path = __dirname + `/../../backend/contractsData/Casino-address-${chainId}.json`;
-  if (fs.existsSync(path)) {
-    const data = fs.readFileSync(path, "utf8");
-    const jsonData = JSON.parse(data);
-    return jsonData.address;
-  }
-  console.log(`Not exists: ${path}`)
-  return null;
-}
-
-async function getMyCasinoContract(chainId, deployer) {
-  const casinoAddress = getCasinoAddress(chainId);
-  if (!casinoAddress) 
-    return null;
-
-  // Check if contract code exists at the address (i.e., it's not a "0x" result)
-  const code = await ethers.provider.getCode(casinoAddress);
-  if (code === "0x") {
-    console.log(`Casino Contract doesn't exist at the address ${casinoAddress}`)
-    return null; 
-  }
-  // Check if the owner of the contract matches the deployer's address
-  const CASINO = await ethers.getContractFactory("Casino");
-  const casino = CASINO.attach(casinoAddress);
-  const owner = await casino.owner();
-
-  if (owner === deployer.address) return casino;
-  console.log(` Owner ${owner} of Casino Contract at address ${casinoAddress} is not deployer ${deployer.address}`)
-  return null;
-}
-
-function getRouletteAddress(chainId) {
-  const path = __dirname + `/../../backend/contractsData/Roulette-address-${chainId}.json`;
-  if (fs.existsSync(path)) {
-    const data = fs.readFileSync(path, "utf8");
-    const jsonData = JSON.parse(data);
-    return jsonData.address;
-  }
-  console.log(`Not exists: ${path}`)
-  return null;
-}
-
-async function getMyRouletteContract(chainId, deployer) {
-  const rouletteAddress = getRouletteAddress(chainId);
-  if (!rouletteAddress) 
-    return null;
-
-  // Check if contract code exists at the address (i.e., it's not a "0x" result)
-  const code = await ethers.provider.getCode(rouletteAddress);
-  if (code === "0x") {
-    console.log(`Roulette Contract doesn't exist at the address ${rouletteAddress}`)
-    return null; 
-  }
-  // Check if the owner of the contract matches the deployer's address
-  const ROULETTE = await ethers.getContractFactory("Roulette");
-  const roulette = ROULETTE.attach(rouletteAddress);
-  const owner = await roulette.owner();
-
-  if (owner === deployer.address) return roulette;
-  console.log(` Owner ${owner} of Roulette Contract at address ${rouletteAddress} is not deployer ${deployer.address}`)
-  return null;
-} */
