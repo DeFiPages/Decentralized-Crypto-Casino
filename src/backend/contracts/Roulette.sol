@@ -22,7 +22,7 @@ contract Roulette {
     constructor() {
         owner = msg.sender;
     }
-    
+
     modifier isEnabled() {
         require(enabled, "Contract is disabled");
         _;
@@ -43,7 +43,9 @@ contract Roulette {
     }
 
     function playRoulette(uint _start, uint _end, uint _tokensBet) external isEnabled {
-        validateRouletteBet(_start, _end, _tokensBet);
+        require(_start >= 0 && _start <= _end && _end <= 14, "Invalid betting range");
+        require(_tokensBet > 0, "Bet amount must be greater than 0");
+        require(_tokensBet <= casToken.balanceOf(msg.sender), "Insufficient tokens for bet");
         uint tokensEarned = executeRouletteBet(_start, _end, _tokensBet);
         storeBetHistory("Roulete", _tokensBet, tokensEarned);
     }
@@ -54,12 +56,7 @@ contract Roulette {
 
     // --- Private Helper Functions ---
 
-    function validateRouletteBet(uint _start, uint _end, uint _tokensBet) private view {
-        require(_start >= 0 && _start <= _end && _end <= 14, "Invalid betting range");
-        require(_tokensBet > 0, "Bet amount must be greater than 0");
-        require(_tokensBet <= casToken.balanceOf(msg.sender), "Insufficient tokens for bet");
-    }
-
+    
     function executeRouletteBet(uint _start, uint _end, uint _tokensBet) private returns (uint) {
         casToken.directTransfer(msg.sender, address(this), _tokensBet);
         uint random = generateRandomNumber();
@@ -78,12 +75,7 @@ contract Roulette {
         return uint(keccak256(abi.encodePacked(block.timestamp, block.prevrandao))) % 15; //block.prevrandao need Solidity 0.8.18, https://soliditydeveloper.com/prevrandao
     }
 
-    function determineRouletteWinnings(
-        uint random,
-        uint _start,
-        uint _end,
-        uint _tokensBet
-    ) private pure returns (uint) {
+    function determineRouletteWinnings(uint random, uint _start, uint _end, uint _tokensBet) private pure returns (uint) {
         if (random >= _start && random <= _end) {
             if (random == 0) {
                 return _tokensBet * 14;
