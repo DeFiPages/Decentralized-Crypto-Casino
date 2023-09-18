@@ -8,8 +8,17 @@ contract Roulette {
     address public owner;
 
     event RouletteGame(uint NumberWin, bool result, uint tokensEarned);
+    event RouletteError(address indexed player, string reason);
 
-    mapping(address => Bet[]) private historyBets; // User betting history
+    event BetPlaced(address indexed player, Color selectedColor, uint tokensBet);
+    event RandomNumberGenerated(uint randomNumber);
+    event WinningsCalculated(uint tokensEarned);
+    event InsufficientBalance(address indexed player, uint availableBalance, uint requiredAmount);
+    event TransferWinnings(address indexed player, uint tokensEarned);
+    event TransferFailed(address indexed player, uint tokensEarned, string reason);
+    event InsufficientContractBalance(uint requiredAmount, uint contractBalance);
+
+    //mapping(address => Bet[]) private historyBets; // User betting history
 
     struct Bet {
         uint tokensBet;
@@ -42,52 +51,72 @@ contract Roulette {
         casToken = MintableToken(_casTokenAddress);
     }
 
-    function playRoulette(uint _start, uint _end, uint _tokensBet) external isEnabled {
-        require(_start >= 0 && _start <= _end && _end <= 14, "Invalid betting range");
-        require(_tokensBet > 0, "Bet amount must be greater than 0");
-        require(_tokensBet <= casToken.balanceOf(msg.sender), "Insufficient tokens for bet");
-        uint tokensEarned = executeRouletteBet(_start, _end, _tokensBet);
-        storeBetHistory("Roulete", _tokensBet, tokensEarned);
+    // function yourHistory(address _owner) external view returns (Bet[] memory) {
+    //     return historyBets[_owner];
+    // }
+
+    enum Color {
+        GREEN,
+        RED,
+        BLACK
     }
 
-    function yourHistory(address _owner) external view returns (Bet[] memory) {
-        return historyBets[_owner];
-    }
+    function playRoulette(Color _selectedColor, uint _tokensBet) external isEnabled {
+        emit BetPlaced(msg.sender, _selectedColor, _tokensBet);
 
-    // --- Private Helper Functions ---
+        if (_selectedColor < Color.GREEN || _selectedColor > Color.BLACK) {
+            emit RouletteError(msg.sender, "Invalid color selected");
+            emit RouletteGame(0, false, 0);
+            revert("Invalid color selected");
+        }
 
-    
-    function executeRouletteBet(uint _start, uint _end, uint _tokensBet) private returns (uint) {
+        if (_tokensBet <= 0) {
+            emit RouletteError(msg.sender, "Bet amount must be greater than 0");
+            emit RouletteGame(0, false, 0);
+            revert("Bet amount must be greater than 0");
+        }
+
+        uint playerBalance = casToken.balanceOf(msg.sender);
+        if (_tokensBet > playerBalance) {
+            emit InsufficientBalance(msg.sender, playerBalance, _tokensBet);
+            emit RouletteError(msg.sender, "Insufficient tokens for bet");
+            emit RouletteGame(0, false, 0);
+            revert("Insufficient tokens for bet");
+        }
+
         casToken.directTransfer(msg.sender, address(this), _tokensBet);
-        uint random = generateRandomNumber();
-        uint tokensEarned = determineRouletteWinnings(random, _start, _end, _tokensBet);
-        bool win = tokensEarned > 0;
 
+        uint random = uint(keccak256(abi.encodePacked(block.timestamp, block.prevrandao))) % 15;
+        emit RandomNumberGenerated(random);
+
+        uint tokensEarned = 0;
+        if (_selectedColor == Color.GREEN && random == 0) {
+            tokensEarned = _tokensBet * 14;
+        } else if (_selectedColor == Color.RED && random >= 1 && random <= 7) {
+            tokensEarned = _tokensBet * 2;
+        } else if (_selectedColor == Color.BLACK && random >= 8 && random <= 14) {
+            tokensEarned = _tokensBet * 2;
+        }
+
+        emit WinningsCalculated(tokensEarned);
+
+        bool win = tokensEarned > 0;
         if (win) {
-            casToken.transfer(msg.sender, tokensEarned);
+            uint contractBalance = casToken.balanceOf(address(this));
+            if (tokensEarned > contractBalance) {
+                emit InsufficientContractBalance(tokensEarned, contractBalance);
+                emit RouletteError(msg.sender, "Contract balance insufficient to pay winnings");
+                emit RouletteGame(random, false, 0);
+                revert("Contract balance insufficient to pay winnings");
+            } else {
+                casToken.transfer(msg.sender, tokensEarned);
+                emit TransferWinnings(msg.sender, tokensEarned);
+            }
         }
 
         emit RouletteGame(random, win, tokensEarned);
-        return tokensEarned;
-    }
 
-    function generateRandomNumber() private view returns (uint) {
-        return uint(keccak256(abi.encodePacked(block.timestamp, block.prevrandao))) % 15; //block.prevrandao need Solidity 0.8.18, https://soliditydeveloper.com/prevrandao
-    }
-
-    function determineRouletteWinnings(uint random, uint _start, uint _end, uint _tokensBet) private pure returns (uint) {
-        if (random >= _start && random <= _end) {
-            if (random == 0) {
-                return _tokensBet * 14;
-            } else {
-                return _tokensBet * 2;
-            }
-        }
-        return 0;
-    }
-
-    function storeBetHistory(string memory _game, uint _tokensBet, uint _tokenEarned) private {
-        Bet memory bet = Bet(_tokensBet, _tokenEarned, _game);
-        historyBets[msg.sender].push(bet);
+ //       Bet memory bet = Bet(_tokensBet, tokensEarned, "Roulette");
+        // historyBets[msg.sender].push(bet);
     }
 }

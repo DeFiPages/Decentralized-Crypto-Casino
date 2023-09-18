@@ -69,18 +69,20 @@ async function main() {
 
   // Fetch the old Roulette contract address
   const oldRouletteContract = await getContract(chainId, deployer, "Roulette");
-  // If the old Roulette contract address exists, disable it
-  if (oldRouletteContract) {
-    //const oldRouletteContract = await ethers.getContractAt("Roulette", oldRouletteAddress);
-    await oldRouletteContract.setEnabled(false);
-    console.log(`Old Roulette contract at ${oldRouletteContract.address} has been disabled.`);
-  }
 
   // Deploy the Roulette contract
   const ROULETTE = await ethers.getContractFactory("Roulette");
   const roulette = await ROULETTE.deploy();
   await roulette.deployed();
   console.log("Roulette deployed to:", roulette.address);
+
+  // If the old Roulette contract address exists, disable it
+  if (oldRouletteContract) {
+    const code = await ethers.provider.getCode(oldRouletteContract.address);
+    //console.log(`Code at ${oldRouletteContract.address}: ${code}`);
+    await oldRouletteContract.setEnabled(false);
+    console.log(`Old Roulette contract at ${oldRouletteContract.address} has been disabled.`);
+  }
 
   // Deploy the Casino contract
   const CASINO = await ethers.getContractFactory("Casino");

@@ -14,9 +14,11 @@ const RouletteGame = ({ balance, account }) => {
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const betAmount = useField("");
-  const start = useField("");
-  const end = useField("");
+  // const start = useField("");
+  // const end = useField("");
   const [lastResult, setlastResult] = useState("");
+
+  const [_selectedColor, setSelectedColor] = useState(null);
 
   const onWheelStop = async () => {
     setMustSpin(false)
@@ -48,7 +50,7 @@ const RouletteGame = ({ balance, account }) => {
       });
     } else {
       try {
-        const result = await contractsService.playRoulette(start.value, end.value, betAmount.value)
+        const result = await contractsService.playRoulette(_selectedColor, betAmount.value);
         setlastResult(result)
         setPrizeNumber(result.numberWon)
         setMustSpin(true)
@@ -66,11 +68,11 @@ const RouletteGame = ({ balance, account }) => {
 
   };
 
-  const changeNumberBet = (begin, final) => {
-    start.change(begin);
-    end.change(final);
+  // const changeNumberBet = (begin, final) => {
+  //   start.change(begin);
+  //   end.change(final);
 
-  };
+  // };
 
   const auxChange = (amount) => {
     if (amount > balance) {
@@ -131,7 +133,7 @@ const RouletteGame = ({ balance, account }) => {
                       variant="contained"
                       color="error"
                       type="submit"
-                      onClick={() => changeNumberBet(1, 7)}
+                      onClick={() => setSelectedColor('RED')}
                     >
                       1-7
                     </Button>
@@ -146,7 +148,7 @@ const RouletteGame = ({ balance, account }) => {
                       variant="contained"
                       color="success"
                       type="submit"
-                      onClick={() => changeNumberBet(0, 0)}
+                      onClick={() => setSelectedColor('GREEN')}
                     >
                       0
                     </Button>
@@ -161,7 +163,7 @@ const RouletteGame = ({ balance, account }) => {
                       size={"large"}
                       type={"submit"}
                       width={"80%"}
-                      functionallity={() => changeNumberBet(8, 14)}
+                      functionallity={() => setSelectedColor('BLACK')}
                     />
                   </Grid>
                 </Grid>
