@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcasino=self.webpackChunkcasino||[]).push([[664],{2664:function(e){e.exports=JSON.parse('{"address":"0x521834325bFe4BC886FeeE0aCFA3CABd2A962B8B"}')}}]);
